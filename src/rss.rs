@@ -1,6 +1,7 @@
 use std::convert::Infallible;
 
 use chrono::{DateTime, Duration, TimeZone};
+use chrono_humanize::{Accuracy, HumanTime, Tense};
 use http::{Response, StatusCode};
 use log::warn;
 use rss::{Channel, Item};
@@ -83,6 +84,7 @@ pub(crate) async fn handler(
         warp::reject::custom(Error::FeedParse(e.to_string()))
     })?;
 
+    update_title(&mut channel, delay);
     update_link(&mut channel, &host, path.as_str(), &r_query);
 
     let new_items: Vec<Item> = channel
@@ -97,6 +99,12 @@ pub(crate) async fn handler(
         builder = builder.header(http::header::CONTENT_TYPE, ct);
     }
     Ok(builder.body(channel.to_string()))
+}
+
+fn update_title(channel: &mut Channel, delay: chrono::Duration) {
+    warn!("{}", delay.num_hours());
+    let ht = HumanTime::from(delay).to_text_en(Accuracy::Precise, Tense::Present);
+    channel.set_title(format!("{} (Rerun after {})", channel.title(), ht));
 }
 
 fn update_link(channel: &mut Channel, host: &str, path: &str, query: &str) {
