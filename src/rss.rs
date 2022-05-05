@@ -6,7 +6,7 @@ use log::warn;
 use rss::{Channel, Item};
 use serde::{Deserialize, Serialize};
 use urlencoding::decode;
-use warp::{Rejection, Reply};
+use warp::{path::FullPath, Rejection, Reply};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub(crate) struct RawQuery {
@@ -53,7 +53,12 @@ impl TryFrom<RawQuery> for Query {
     }
 }
 
-pub(crate) async fn handler(query: RawQuery) -> Result<impl Reply, Rejection> {
+pub(crate) async fn handler(
+    host: String,
+    path: FullPath,
+    r_query: String,
+    query: RawQuery,
+) -> Result<impl Reply, Rejection> {
     let query: Query = query.try_into().map_err(|e: String| {
         warn!("failed to parse query: {}", e);
         warp::reject::custom(Error::QueryParse(e))
@@ -78,6 +83,8 @@ pub(crate) async fn handler(query: RawQuery) -> Result<impl Reply, Rejection> {
         warp::reject::custom(Error::FeedParse(e.to_string()))
     })?;
 
+    update_link(&mut channel, &host, path.as_str(), &r_query);
+
     let new_items: Vec<Item> = channel
         .items_mut()
         .iter_mut()
@@ -90,6 +97,16 @@ pub(crate) async fn handler(query: RawQuery) -> Result<impl Reply, Rejection> {
         builder = builder.header(http::header::CONTENT_TYPE, ct);
     }
     Ok(builder.body(channel.to_string()))
+}
+
+fn update_link(channel: &mut Channel, host: &str, path: &str, query: &str) {
+    let scheme: &'static str = if cfg!(debug_assertions) {
+        "http"
+    } else {
+        "https"
+    };
+    let link = format!("{scheme}://{host}/{path}?{query}");
+    channel.set_link(link);
 }
 
 fn postdate_item(item: &mut Item, delay: Duration) -> Option<Item> {
