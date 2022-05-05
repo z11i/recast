@@ -7,6 +7,7 @@ edition = "2021"
 chrono = "0.4.19"
 http = "0.2.7"
 log = "0.4.17"
+pretty_env_logger = "0.4.0"
 reqwest = { version = "0.11.10", default-features = false, features = ["rustls-tls", "gzip", "brotli", "deflate"] }
 rss = "2.0.1"
 rustls = "0.20.4"

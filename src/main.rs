@@ -4,7 +4,7 @@ mod rss;
 
 #[tokio::main]
 async fn main() {
-    println!("Rust server started");
+    pretty_env_logger::init();
 
     let hello = warp::get()
         .and(warp::path!("hello" / String))
