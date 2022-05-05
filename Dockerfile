@@ -2,7 +2,7 @@ FROM rust:latest AS builder
 WORKDIR /app
 
 ## Cache build dependencies
-COPY Cargo.toml Cargo.lock .
+COPY Cargo.toml Cargo.lock ./
 # Create a fake main.rs file to build, so Docker can cache the dependencies.
 RUN mkdir -p ./src && echo 'fn main() {}' > ./src/main.rs
 RUN cargo fetch
