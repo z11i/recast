@@ -1,0 +1,20 @@
+[package]
+name = "recast"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+chrono = "0.4.19"
+http = "0.2.7"
+log = "0.4.17"
+reqwest = { version = "0.11.10", default-features = false, features = ["rustls-tls", "gzip", "brotli", "deflate"] }
+rss = "2.0.1"
+rustls = "0.20.4"
+serde = { version = "1.0.137", features = ["derive"] }
+tokio = { version = "1.18.1", features = ["full"] }
+urlencoding = "2.1.0"
+warp = { version = "0.3.2", features = ["tokio-rustls"] }
+
+[[bin]]
+name = "recast"
+path = "src/main.rs"
